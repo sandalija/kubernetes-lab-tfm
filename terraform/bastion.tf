@@ -29,13 +29,6 @@ data "http" "current_ip" {
   url = "https://checkip.amazonaws.com/"
 }
 
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = var.aws_availability_zone
-}
-
 resource "aws_security_group" "bastion" {
   name        = "bastion-sg"
   description = "Allow SSH from deployment station"
@@ -56,19 +49,7 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
-  }
-}
-
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
-}
 
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.amazon_linux_2023.id
@@ -96,6 +77,19 @@ echo "Host 10.0.*
 chown -R ec2-user:ec2-user /home/ec2-user/.ssh
 chmod 700 /home/ec2-user/.ssh
 chmod 600 /home/ec2-user/.ssh/config
+
+# Install kubectl
+curl -Lo /usr/local/bin/kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.1/2024-03-20/bin/linux/amd64/kubectl
+chmod +x /usr/local/bin/kubectl
+
+# Install k9s
+curl -Lo /usr/local/bin/k9s https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz
+tar -xzvf /usr/local/bin/k9s -C /usr/local/bin/ k9s
+chmod +x /usr/local/bin/k9s
+
+# Make sure ec2-user has access to binaries
+chown ec2-user:ec2-user /usr/local/bin/kubectl
+chown ec2-user:ec2-user /usr/local/bin/k9s
 EOF
 
   provisioner "local-exec" {
