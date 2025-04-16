@@ -80,15 +80,28 @@ resource "aws_instance" "bastion" {
   key_name = aws_key_pair.deployer.key_name
 
   tags = {
-    Name = "BastionHost"
+    Name = "bastion"
   }
+
+  user_data = <<EOF
+#!/bin/bash
+
+mkdir -p /home/ec2-user/.ssh
+
+echo "Host 10.0.*
+  User ec2-user
+  IdentityFile /home/ec2-user/cluster.pem
+  StrictHostKeyChecking no" > /home/ec2-user/.ssh/config
+
+chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+chmod 700 /home/ec2-user/.ssh
+chmod 600 /home/ec2-user/.ssh/config
+EOF
 
   provisioner "local-exec" {
     command = <<EOT
       sleep 30 && \
-      scp -o StrictHostKeyChecking=no -i ~/.ssh/bastion-key.pem ${var.public_key_path} ec2-user@${self.public_ip}:/home/ec2-user/${var.public_key_path} && \
-      ssh -o StrictHostKeyChecking=no -i ~/.ssh/bastion-key.pem ec2-user@${self.public_ip} "chmod 600 /home/ec2-user/${var.public_key_path}"
+      scp -o StrictHostKeyChecking=no -i ${var.private_key_path} ${var.private_key_path} ec2-user@${self.public_ip}:/home/ec2-user/cluster.pem
     EOT
   }
 }
-
