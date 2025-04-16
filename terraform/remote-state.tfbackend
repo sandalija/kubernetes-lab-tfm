@@ -1,0 +1,3 @@
+bucket = "sergio-exp-terraform-remote-state"
+key    = "tfstates"
+region = "eu-central-1"
