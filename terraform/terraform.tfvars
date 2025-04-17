@@ -1,4 +1,5 @@
-flatcar_ami           = "ami-0b177b95890e9beaa"
+flatcar_ami           = "ami-0ac808aa33c1b5463" # "ami-0b177b95890e9beaa"
+ec2_user              = "core"
 aws_availability_zone = "eu-central-1a"
 public_key_path       = "./kubernetes-cluster.pub"
 private_key_path       = "./kubernetes-cluster"

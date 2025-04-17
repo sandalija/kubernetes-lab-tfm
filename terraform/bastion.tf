@@ -70,7 +70,7 @@ resource "aws_instance" "bastion" {
 mkdir -p /home/ec2-user/.ssh
 
 echo "Host 10.0.*
-  User ec2-user
+  User ${var.ec2_user}
   IdentityFile /home/ec2-user/cluster.pem
   StrictHostKeyChecking no" > /home/ec2-user/.ssh/config
 
@@ -79,8 +79,8 @@ chmod 700 /home/ec2-user/.ssh
 chmod 600 /home/ec2-user/.ssh/config
 
 # Install kubectl
-curl -Lo /usr/local/bin/kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.1/2024-03-20/bin/linux/amd64/kubectl
-chmod +x /usr/local/bin/kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # Install k9s
 curl -Lo /usr/local/bin/k9s https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz

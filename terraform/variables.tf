@@ -7,6 +7,11 @@ variable "aws_availability_zone" {
   description = "AWS Availability zone"
 }
 
+variable "ec2_user" {
+  type    = string
+  default = "ec2-user"
+}
+
 variable "private_key_path" {
   type        = string
   description = "Path to file with public key"
