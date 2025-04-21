@@ -7,6 +7,12 @@ variable "aws_availability_zone" {
   description = "AWS Availability zone"
 }
 
+variable "public_worker_1" {
+  type        = bool
+  default     = false
+  description = "Set as true to configure Worker 1 as public"
+}
+
 variable "ec2_user" {
   type    = string
   default = "ec2-user"

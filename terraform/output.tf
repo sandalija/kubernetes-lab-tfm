@@ -2,6 +2,10 @@ output "bastion" {
   value = "Bastion -> Public IP ${aws_instance.bastion.public_ip}, Private IP ${aws_instance.bastion.private_ip}"
 }
 
+output "bastion_ip" {
+  value = aws_instance.bastion.public_ip
+}
+
 output "control_plane" {
   value = "Control Plane -> Private IP ${aws_instance.control_plane.private_ip}"
 }

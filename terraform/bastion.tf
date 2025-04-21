@@ -41,6 +41,13 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["${chomp(data.http.current_ip.response_body)}/32"]
   }
 
+  ingress {
+    from_port   = 8
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["${chomp(data.http.current_ip.response_body)}/32"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
