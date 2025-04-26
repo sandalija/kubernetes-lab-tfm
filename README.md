@@ -39,6 +39,7 @@ Host 10.0.*
 ```shell
 cd ../ansible
 ansible-galaxy collection install git+https://github.com/k3s-io/k3s-ansible.git
+ansible-galaxy collection install kubernetes.core
 ```
 
 Create a Ansible Vault to store the sync token
@@ -48,8 +49,7 @@ ansible-vault create k3s-vault.yaml
 ````
 
 ````
-ansible-playbook k3s.orchestration.site -i inventory.yaml
-ansible-playbook kubeconfig.yaml -i inventory.yaml
+ansible-playbook playbooks/site.yml -i inventory.yaml
 ```
 
 Now you can use the bastion and use kubectl or k9s

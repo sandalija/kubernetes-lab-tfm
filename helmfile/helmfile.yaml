@@ -1,0 +1,20 @@
+repositories:
+  - name: projectcalico
+    url: https://docs.tigera.io/calico/charts
+
+releases:
+  - name: calico
+    namespace: tigera-operator
+    chart: projectcalico/tigera-operator
+    version: 3.29.3
+    createNamespace: true
+    values:
+    - values/calico.yaml
+    hooks:
+      - events: ["postinstall"]
+        showlogs: true
+        command: kubectl
+        args:
+          - apply
+          - -f
+          - https://raw.githubusercontent.com/projectcalico/calico/v3.29.3/manifests/custom-resources.yaml

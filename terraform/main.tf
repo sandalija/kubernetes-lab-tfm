@@ -43,6 +43,8 @@ resource "aws_instance" "worker_1" {
   private_ip             = "10.0.2.163"
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
+  associate_public_ip_address = var.public_worker_1
+
   key_name = aws_key_pair.deployer.key_name
 
   tags = {

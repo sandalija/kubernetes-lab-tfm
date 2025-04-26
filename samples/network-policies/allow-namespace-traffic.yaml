@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-network-policy
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backoffice-same-namespace
+  namespace: test-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      backoffice: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              backoffice: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: random-api
+  namespace: test-network-policy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: random-api
+      backoffice: "true"
+  template:
+    metadata:
+      labels:
+        app: random-api
+        backoffice: "true"
+    spec:
+      containers:
+        - name: api
+          image: vanapagan/test-rest-api
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: random-api
+  namespace: test-network-policy
+spec:
+  selector:
+    app: random-api
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: test-network-policy
+  name: curl-test
+  labels:
+    backoffice: "true"
+spec:
+  containers:
+    - name: curl
+      image: curlimages/curl:latest
+      command:
+        - sh
+        - -c
+        - |
+          sleep 10
+          echo "🌐 Curl to Random Joke API:"
+          curl -s http://random-api/test && echo
+          sleep 3600
