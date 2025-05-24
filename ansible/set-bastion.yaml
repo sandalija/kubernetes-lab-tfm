@@ -1,0 +1,37 @@
+---
+- name: Copy kubeconfig from server to bastion
+  hosts: server
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Fetch kubeconfig from server
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /tmp/k3s.yaml
+        flat: yes
+
+- name: Push kubeconfig to bastion
+  hosts: bastion
+  gather_facts: false
+  tasks:
+    - name: Ensure .kube directory exists
+      ansible.builtin.file:
+        path: /home/ec2-user/.kube
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: '0700'
+
+    - name: Copy kubeconfig to bastion home directory
+      ansible.builtin.copy:
+        src: /tmp/k3s.yaml
+        dest: /home/ec2-user/.kube/config
+        owner: ec2-user
+        group: ec2-user
+        mode: '0600'
+
+    - name: Replace server address in kubeconfig
+      ansible.builtin.replace:
+        dest: /home/ec2-user/.kube/config
+        regexp: '127\.0\.0\.1'
+        replace: '10.0.2.135'
