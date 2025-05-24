@@ -1,0 +1,45 @@
+# - name: Set SELinux in AL2023+
+#   hosts: all
+#   become: true
+#   tasks:
+#     - ansible.posix.selinux:
+#         policy: targeted
+#         state: permissive
+
+#     - name: Ensure wget and dependencies are installed
+#       package:
+#         name:
+#           - wget
+#           - git
+#           - checkpolicy
+#           - selinux-policy
+#           - selinux-policy-devel
+#           - policycoreutils
+#           - container-selinux
+#         state: present
+#       ignore_errors: yes  # container-selinux puede fallar en Amazon Linux 2023, lo manejamos más abajo
+
+#     - name: Create temp directory for k3s-selinux RPM
+#       tempfile:
+#         state: directory
+#         suffix: k3s-selinux
+#       register: tmpdir
+
+#     - name: Download k3s-selinux RPM from GitHub release
+#       get_url:
+#         url: https://github.com/k3s-io/k3s-selinux/releases/download/v1.6.latest.1/k3s-selinux-1.6-1.el8.noarch.rpm
+#         dest: "{{ tmpdir.path }}/k3s-selinux.rpm"
+
+#     - name: Install k3s-selinux RPM
+#       yum:
+#         name: "{{ tmpdir.path }}/k3s-selinux.rpm"
+#         state: present
+
+#     - name: Ensure SELinux policy module is installed
+#       command: semodule -l
+#       register: selinux_modules
+
+#     - name: Verify k3s SELinux module is loaded
+#       debug:
+#         msg: "k3s SELinux module installed correctly"
+#       when: '"k3s" in selinux_modules.stdout'

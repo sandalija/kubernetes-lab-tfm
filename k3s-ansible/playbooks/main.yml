@@ -1,0 +1,93 @@
+- name: Install pip on EC2 instance
+  hosts: bastion
+  become: true
+  tasks:
+    - name: Ensure Python and pip are installed (Amazon Linux / Ubuntu)
+      ansible.builtin.package:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+- name: Copiar kubeconfig desde nodo K3s a bastion
+  hosts: localhost
+  gather_facts: no
+  tasks:
+
+    - name: Obtener kubeconfig del nodo K3s
+      ansible.builtin.fetch:
+        src: /home/ec2-user/.kube/config
+        dest: /tmp/kubeconfig/
+        flat: yes
+      delegate_to: 10.0.2.135
+
+    - name: Crear carpeta .kube en el bastion
+      ansible.builtin.file:
+        path: /home/ec2-user/.kube
+        state: directory
+        mode: '0755'
+      become: true
+      delegate_to: bastion
+
+    - name: Subir kubeconfig al bastion
+      ansible.builtin.copy:
+        src: /tmp/kubeconfig/config
+        dest: /home/ec2-user/.kube/config
+        owner: ec2-user
+        group: ec2-user
+        mode: '0644'
+      become: true
+      delegate_to: bastion
+    
+    - name: Reemplazar IP del servidor en kubeconfig
+      ansible.builtin.replace:
+        path: /home/ec2-user/.kube/config
+        regexp: 'https://127.0.0.1:6443'
+        replace: "https://{{ hostvars[groups['server'][0]]['ansible_host'] | default(groups['server'][0]) }}:6443"
+      become: true
+      delegate_to: bastion
+
+- name: Copy resources to bastion
+  hosts: bastion
+  tasks:
+  - name: Create resources directory
+    ansible.builtin.file:
+      path: /home/ec2-user/resources
+      state: directory
+
+  - name: Copy deploy sample manifests
+    ansible.builtin.copy:
+      src: ../../resources/
+      dest: /home/ec2-user/resources
+      owner: ec2-user
+      group: ec2-user
+      mode: '0644'
+
+  - name: Create helmfile directory
+    ansible.builtin.file:
+      path: /home/ec2-user/helmfile
+      state: directory
+
+  - name: Copy helmfile 
+    ansible.builtin.copy:
+      src: ../../helmfile/
+      dest: /home/ec2-user/helmfile
+      owner: ec2-user
+      group: ec2-user
+      mode: '0644'
+
+  - name: Create a k8s namespace
+    kubernetes.core.k8s:
+      name: tests
+      api_version: v1
+      kind: Namespace
+      state: present
+
+  - name: Deploy sample NGINX manifest
+    kubernetes.core.k8s:
+      state: present
+      src: /home/ec2-user/resources/nginx-service.yaml
+      namespace: tests
+
+  
+
