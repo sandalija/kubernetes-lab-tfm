@@ -1,24 +1,41 @@
 # kubernetes-lab-tfm
 
-## Run the cluser
+Deploy a kubernetes cluster based on k3s using Terraform and Ansible using standalone EC2 servers (no EKS).
 
-### Create a key pair for your instance
+![cluster-schema](./assets/AWS-Cluster-schema.png)
+
+# TL;DR
+
+Apply all the infraestructure and configuration using the `run.sh` script.
+
+```shell
+./run.sh
+```
+
+## Installation 
+
+### Create a key pair
+
+Create a SSH key pair to connect to the EC2 instances
 
 ````shell
 ssh-keygen -t ed25519
 ````
+
 This file should match with *private_key_path* and *public_key_path* in `terraform.tfvars`.
 
 ### Create the cluster using terraform
 
+
 ````shell
 cd terraform/
-terraform init -backend-config remote-state.tfbackend -upgrade
 terraform init
+# Optional: edit the remote-state.tfbackend and use S3 to store your TF state
+# terraform init -backend-config remote-state.tfbackend
 terraform apply
 ````
 
-Now, copy your public IP for your host instance to configure `.ss/config` file.
+Now, copy your public IP for your host instance to configure `.ssh/config` file.
 
 ````
 Host bastion
@@ -34,28 +51,22 @@ Host 10.0.*
   UserKnownHostsFile=/dev/null
 ````
 
-### Condfigure k3s using ansible
+### Configure k3s using ansible
 
 ```shell
 cd ../ansible
-ansible-galaxy collection install git+https://github.com/k3s-io/k3s-ansible.git
-ansible-galaxy collection install kubernetes.core
+python3 -m venv .venv
+source ./venv/bin/activate
+pip install -r requirements.txt
+ansible-galaxy collection install -r requirements.yaml
+ansible-playbook main.yaml
 ```
 
-Create a Ansible Vault to store the sync token
+### Usage
 
-```shell
-ansible-vault create k3s-vault.yaml
-````
-
-````
-ansible-playbook playbooks/site.yml -i inventory.yaml
-```
-
-Now you can use the bastion and use kubectl or k9s
+Connect to your bastion instance and start using the cluster
 
 ```shell
 ssh bastion
-kubectl get nodes 
-k9s
-````
+kubectl get nodes
+```
