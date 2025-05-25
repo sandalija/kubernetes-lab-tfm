@@ -37,7 +37,6 @@ echo "Updated 'bastion' IP to $new_ip in $ssh_config"
 ###############################
 # Ansible
 ###############################
-cd k3s-ansible
-ansible-playbook playbooks/site.yml -i inventory.yaml
-ansible-playbook playbooks/main.yml -i inventory.yaml
+cd ansible
+ansible-playbook main.yaml -i inventory.yaml
 

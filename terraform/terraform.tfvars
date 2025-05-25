@@ -1,5 +1,5 @@
 flatcar_ami           = "ami-0b177b95890e9beaa"
 ec2_user              = "core"
 aws_availability_zone = "eu-central-1a"
-public_key_path       = "./kubernetes-cluster.pub"
-private_key_path      = "./kubernetes-cluster"
+public_key_path       = "~/.ssh/aws-eks-cluster.pub"
+private_key_path      = "~/.ssh/aws-eks-cluster"

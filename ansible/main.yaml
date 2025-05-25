@@ -1,3 +1,6 @@
-- import_playbook: k3-ansible/playbooks/site.yml
-- import_playbook: calico.yml
-- import_playbook: set-bastion.yml
+- name: Create cluster
+  import_playbook: k3s-ansible/playbooks/site.yml
+- name: Configure Calico
+  import_playbook: calico.yaml
+- name: Create bastion kubectl confing
+  import_playbook: set-bastion.yaml
