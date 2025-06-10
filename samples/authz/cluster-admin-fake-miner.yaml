@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-cluster-admin
+  namespace: tests
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-admin-binding
+subjects:
+- kind: ServiceAccount
+  name: sa-cluster-admin
+  namespace: tests
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend
+  namespace: tests
+spec:
+  serviceAccountName: sa-cluster-admin
+  containers:
+  - name: backend
+    image: alpine
+    command: ["/bin/sh", "-c"]
+    args:
+    #- sleep 3600
+    # - apk add kubectl --quiet && kubectl run btc-miner \
+    #  --image=alpine \
+    #  --namespace=tests \
+    #  --restart=Never \
+    #  --command -- /bin/sh -c 'while true; do echo "Mining fake BTC...."; sleep 2; done'

